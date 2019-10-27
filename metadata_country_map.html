@@ -81,23 +81,14 @@
 <body>
 <script>
 
-//Initial Width, Height
-//var width = 1300;
-//var height = width / 2,
-//    centered;
 
 var width = 1300;
 var height = width / 2;
 
 // The svg
 var svg = d3.select("body").append("svg")
-    //.attr("width", width)
-    //.attr("height", height);
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("viewBox", "0 0 1300 750")
-
-//var svg = d3.select("body").append("svg")
-    //.call(responsivefy);
 
 // Map and projection
 var path = d3.geoPath();
@@ -105,22 +96,12 @@ var projection = d3.geoMercator()
   .scale(200)
   .center([0,20])
   .translate([width / 2, height / 2]);
-  //.translate([0, 0])
-  //.scale(width / 2 / Math.PI);
 
 // Data and color scale
 var data = d3.map();
 var colorScale = d3.scaleThreshold()
   .domain([0, 1, 10, 100, 300, 400])
   .range(d3.schemeBlues[5])
-
-// Setup the tool tip.  Old Tooltip Setup
-// See original documentation for more details on styling: http://labratrevenge.com/d3-tip/
-//var tip = d3.tip()
-//  .attr("class", "d3-tip")
-//  .offset([-8, 0])
-//  .html(function(d) { return "Number of Metadata Instances: " + d.total; });
-
 
 // Set tooltips: Verbose Tooltips Setup, Directions from Micah Stubbs @github
 const tip = d3
@@ -212,8 +193,6 @@ d3.queue()
 
 function ready(error, topo) {
 
-  //Deprecated Mouseover moved to mouseover.line, let mouseOver = function(d) {}
-
   let mouseLeave = function(d) {
     d3.selectAll(".Country")
       .transition()
@@ -246,10 +225,8 @@ function ready(error, topo) {
       .on("mouseover.toolt", (d, i, n) => {
           if (d.total > 0){
                 tip.show(d,n[i]);
-                // handleMouseOver(d,i,n);
         }
        })
-      //.on("mouseover.line", mouseOver ) Expanded above made Lines dependent on >0
       .on("mouseover.line", function(d) {
         if(d.total > 0){
             d3.selectAll(".Country")
@@ -265,8 +242,6 @@ function ready(error, topo) {
         })
       .on('mouseout.toolt', tip.hide)
       .on("mouseout.leave", mouseLeave )
-      //.call(zoom);                    // Adds zoom functionality
-      //.call(zoom.transform, transform); // Calls/inits handleZoom
     }
 
 
