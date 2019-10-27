@@ -1,0 +1,275 @@
+<!-- Code from d3-graph-gallery.com -->
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href='https://fonts.googleapis.com/css?family=Heebo' rel='stylesheet'>
+<html>
+<style>
+
+
+.country:hover{
+  stroke: #fff;
+  stroke-width: .7px;
+}
+.hidden { 
+  display: none; 
+}
+.d3-tip  {
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 2px;
+    font-family: 'Heebo';
+
+  }
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Northward tooltips */
+.d3-tip.n:after {
+  content: "\25BC";
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+  text-align: center;
+}
+
+/* Eastward tooltips */
+.d3-tip.e:after {
+  content: "\25C0";
+  margin: -4px 0 0 0;
+  top: 50%;
+  left: -8px;
+}
+
+/* Southward tooltips */
+.d3-tip.s:after {
+  content: "\25B2";
+  margin: 0 0 1px 0;
+  top: -8px;
+  left: 0;
+  text-align: center;
+}
+
+/* Westward tooltips */
+.d3-tip.w:after {
+  content: "\25B6";
+  margin: -4px 0 0 -1px;
+  top: 50%;
+  left: 100%;
+}
+
+</style>
+<!-- Load d3.js -->
+<script src="http://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+
+<!-- Create an element where the map will take place -->
+<body>
+<script>
+
+//Initial Width, Height
+//var width = 1300;
+//var height = width / 2,
+//    centered;
+
+var width = 1300;
+var height = width / 2;
+
+// The svg
+var svg = d3.select("body").append("svg")
+    //.attr("width", width)
+    //.attr("height", height);
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", "0 0 1300 750")
+
+//var svg = d3.select("body").append("svg")
+    //.call(responsivefy);
+
+// Map and projection
+var path = d3.geoPath();
+var projection = d3.geoMercator()
+  .scale(200)
+  .center([0,20])
+  .translate([width / 2, height / 2]);
+  //.translate([0, 0])
+  //.scale(width / 2 / Math.PI);
+
+// Data and color scale
+var data = d3.map();
+var colorScale = d3.scaleThreshold()
+  .domain([0, 1, 10, 100, 300, 400])
+  .range(d3.schemeBlues[5])
+
+// Setup the tool tip.  Old Tooltip Setup
+// See original documentation for more details on styling: http://labratrevenge.com/d3-tip/
+//var tip = d3.tip()
+//  .attr("class", "d3-tip")
+//  .offset([-8, 0])
+//  .html(function(d) { return "Number of Metadata Instances: " + d.total; });
+
+
+// Set tooltips: Verbose Tooltips Setup, Directions from Micah Stubbs @github
+const tip = d3
+  .tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(
+    //function(d) { return "Number of Metadata Instances: " + d.properties.name + d.total ; }
+    d =>
+    `<span class='details'>${
+        d.properties.name
+      }<br></span><strong>Number of Metadata Instances: </strong><span class='details'>${(
+        d.total
+      )}</span>`
+    );
+
+tip.direction(function(d) {
+  if (d.properties.name === 'Antarctica') return 'n'
+  // Americas
+  if (d.properties.name === 'Greenland') return 's'
+  if (d.properties.name === 'Canada') return 'e'
+  if (d.properties.name === 'United States') return 's'
+  if (d.properties.name === 'Mexico') return 'e'
+  // Europe
+  if (d.properties.name === 'Iceland') return 's'
+  if (d.properties.name === 'Norway') return 's'
+  if (d.properties.name === 'Sweden') return 's'
+  if (d.properties.name === 'Finland') return 's'
+  if (d.properties.name === 'Russia') return 'w'
+  // Asia
+  if (d.properties.name === 'China') return 'w'
+  if (d.properties.name === 'Japan') return 's'
+  // Oceania
+  if (d.properties.name === 'Indonesia') return 'w'
+  if (d.properties.name === 'Papua New Guinea') return 'w'
+  if (d.properties.name === 'Australia') return 'w'
+  if (d.properties.name === 'New Zealand') return 'w'
+  // otherwise if not specified
+  return 'n'
+})
+
+tip.offset(function(d) {
+  // [top, left]
+  if (d.properties.name === 'Antarctica') return [0, 0]
+  // Americas
+  if (d.properties.name === 'Greenland') return [10, -10]
+  if (d.properties.name === 'Canada') return [24, -28]
+  if (d.properties.name === 'United States') return [-50, -300]
+  if (d.properties.name === 'Mexico') return [12, 10]
+  if (d.properties.name === 'Chile') return [0, -15]
+  // Europe
+  if (d.properties.name === 'Iceland') return [15, 0]
+  if (d.properties.name === 'Norway') return [10, -28]
+  if (d.properties.name === 'Sweden') return [10, -8]
+  if (d.properties.name === 'Finland') return [10, 0]
+  if (d.properties.name === 'France') return [-9, 66]
+  if (d.properties.name === 'Italy') return [-8, -6]
+  if (d.properties.name === 'Russia') return [100, 750]
+  // Africa
+  if (d.properties.name === 'Madagascar') return [-10, 10]
+  // Asia
+  if (d.properties.name === 'China') return [-16, -8]
+  if (d.properties.name === 'Mongolia') return [-5, 0]
+  if (d.properties.name === 'Pakistan') return [-10, 13]
+  if (d.properties.name === 'India') return [-11, -18]
+  if (d.properties.name === 'Nepal') return [-8, 1]
+  if (d.properties.name === 'Myanmar') return [-12, 0]
+  if (d.properties.name === 'Laos') return [-12, -8]
+  if (d.properties.name === 'Vietnam') return [-12, -4]
+  if (d.properties.name === 'Japan') return [5, 5]
+  // Oceania
+  if (d.properties.name === 'Indonesia') return [0, -5]
+  if (d.properties.name === 'Papua New Guinea') return [-5, -10]
+  if (d.properties.name === 'Australia') return [-15, 0]
+  if (d.properties.name === 'New Zealand') return [-15, 0]
+  // otherwise if not specified
+  return [-10, 0]
+})
+
+
+svg.call(tip);
+
+
+// Load external data and boot
+d3.queue()
+  .defer(d3.json, "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_map_units.geojson")
+  .defer(d3.csv, "https://raw.githubusercontent.com/brianeno/test/master/metadata_countries.csv", function(d) { data.set(d.code, +d.count); })
+  .await(ready);
+
+function ready(error, topo) {
+
+  //Deprecated Mouseover moved to mouseover.line, let mouseOver = function(d) {}
+
+  let mouseLeave = function(d) {
+    d3.selectAll(".Country")
+      .transition()
+      .duration(200)
+      .style("opacity", .8)
+    d3.select(this)
+      .transition()
+      .duration(200)
+      .style("stroke", "none")
+  }
+
+  // Draw the map
+  svg.append("g")
+    .selectAll("path")
+    .data(topo.features)
+    .enter()
+    .append("path")
+      // draw each country
+      .attr("d", d3.geoPath()
+        .projection(projection)
+      )
+      // set the color of each country
+      .attr("fill", function (d) {
+        d.total = data.get(d.properties.adm0_a3_us) || 0;
+        return colorScale(d.total);
+      })
+      .style("stroke", "transparent")
+      .attr("class", function(d){ return "Country" } )
+      .style("opacity", .8)
+      .on("mouseover.toolt", (d, i, n) => {
+          if (d.total > 0){
+                tip.show(d,n[i]);
+                // handleMouseOver(d,i,n);
+        }
+       })
+      //.on("mouseover.line", mouseOver ) Expanded above made Lines dependent on >0
+      .on("mouseover.line", function(d) {
+        if(d.total > 0){
+            d3.selectAll(".Country")
+              .transition()
+              .duration(200)
+              .style("opacity", .5)
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .style("opacity", 1)
+              .style("stroke", "black")
+            }
+        })
+      .on('mouseout.toolt', tip.hide)
+      .on("mouseout.leave", mouseLeave )
+      //.call(zoom);                    // Adds zoom functionality
+      //.call(zoom.transform, transform); // Calls/inits handleZoom
+    }
+
+
+</script>
+</body>
+</html>
